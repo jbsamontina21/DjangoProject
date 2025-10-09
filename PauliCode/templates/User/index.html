@@ -1,0 +1,70 @@
+{% load static %}
+{%include "partials/header.html"%}
+
+<body class="" style="background-color: #1a1a1a;">
+  <main class="main-content mt-2 mb-5">
+    <section>
+      <div class="page-header min-vh-100 d-flex align-items-center justify-content-center">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-xl-4 col-lg-5 col-md-6 col-sm-8">
+              <!-- Main Sign In Card -->
+              <div class="card" style="background-color: #2d2d2d; border: 1px solid #404040; border-radius: 20px;">
+                <div class="card-body px-4 py-4">
+                  <!-- Logo -->
+                  <div class="text-center mb-3">
+                    <img src="{% static 'img/PCodeLogo.svg' %}" alt="PauliCode Logo" style="max-width: 150px; width: 50%;">
+                  </div>
+                  
+                  <!-- Welcome Text -->
+                  <div class="text-center mb-3">
+                    <h4 class="text-white font-weight-bolder mb-2">Welcome Back!</h4>
+                    <p class="text-muted mb-0 small">Sign in to continue your learning journey</p>
+                  </div>
+                  
+                  <!-- Form -->
+                  <form role="form">
+                    <div class="mb-3">
+                      <label class="text-white mb-2 small font-weight-bold">Student ID</label>
+                      <input type="text" class="form-control" placeholder="Enter your Student ID" style="background-color: #1a1a1a; border: 1px solid #404040; border-radius: 10px; color: white;">
+                    </div>
+                    
+                    <div class="mb-3">
+                      <label class="text-white mb-2 small font-weight-bold">Password</label>
+                      <input type="password" class="form-control" placeholder="Enter your password" style="background-color: #1a1a1a; border: 1px solid #404040; border-radius: 10px; color: white;">
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                      <input class="form-check-input" type="checkbox" id="rememberMe">
+                      <label class="form-check-label text-white small" for="rememberMe">Remember me</label>
+                    </div>
+                    
+                    <div class="text-center">
+                      <button type="button" class="btn w-100 mb-3 font-weight-bold" style="background-color: #4CD964; border-radius: 10px; border: none; color: black;">Log In</button>
+                    </div>
+                    
+                    <div class="text-center">
+                      <a href="javascript:;" class="text-decoration-none small" style="color: #4CD964;">Forgot Password?</a>
+                    </div>
+                  </form> 
+                </div>
+              </div>
+              
+              <!-- Sign Up Card -->
+              <div class="card mt-3" style="background-color: #2d2d2d; border: 1px solid #404040; border-radius: 20px;">
+                <div class="card-body px-4 py-3 text-center">
+                  <p class="text-muted mb-2 small">Don't have an account?</p>
+                  <a type="button" class="btn w-100 font-weight-bold" href='{% url 'signup' %}' style="background-color: transparent; border: 2px solid #4CD964; border-radius: 10px; color: #4CD964;">Sign Up</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <!--   Core JS Files   -->
+ {%include "partials/scripts.html"%}
+</body>
+
+</html>
