@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import User
+from .models import User, Class
 from django.contrib import messages
 
 # ---------------- LOGIN & DASHBOARD ---------------- #
@@ -19,7 +19,7 @@ def login_view(request):
         try:
             user = User.objects.get(school_id=school_id, password=password)
             
-            # store user data in session
+            # Store user data in session
             request.session['school_id'] = user.school_id
             request.session['first_name'] = user.first_name
             request.session['last_name'] = user.last_name
@@ -28,6 +28,7 @@ def login_view(request):
 
             messages.success(request, f"Welcome back, {user.first_name}!")
             return redirect('dashboard')
+
         except User.DoesNotExist:
             messages.error(request, "Invalid School ID or Password.")
             return redirect('index')
@@ -39,22 +40,27 @@ def dashboard(request):
     school_id = request.session.get('school_id')
 
     if not school_id:
-        # redirect to login if not logged in
+        # Redirect to login if not logged in
         messages.warning(request, "Please log in first.")
         return redirect('index')
 
     user = User.objects.filter(school_id=school_id).first()
 
+    # Get classes created by the teacher
+    classes = Class.objects.filter(teacher=user).order_by('-class_id')
+
     return render(request, 'User/dashboard.html', {
         'currentpage': 'dashboard',
         'user': user,
+        'classes': classes,  # Pass class list to template
     })
 
 
 def logout_view(request):
-    request.session.flush()  # clears all session data
+    request.session.flush()  # Clears all session data
     messages.success(request, "You have been logged out successfully.")
     return redirect('index')
+
 
 # ---------------- SIGNUP ---------------- #
 
@@ -98,6 +104,61 @@ def signup(request):
 
     return render(request, 'User/sign-up.html')
 
-# ---------------- USER MANAGEMENT ---------------- #
+
+# ---------------- CLASS MANAGEMENT ---------------- #
+
+def create_class(request):
+    if request.method == "POST":
+        class_code = request.POST.get("class_code")
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        upload_icon = request.FILES.get("upload_icon")
+
+        teacher = User.objects.get(school_id=request.session.get("school_id"))
+
+        # Prevent duplicate class codes
+        if Class.objects.filter(class_code=class_code).exists():
+            messages.error(request, "Class code already exists.")
+            return redirect('dashboard')
+
+        Class.objects.create(
+            class_code=class_code,
+            title=title,
+            description=description,
+            upload_icon=upload_icon,
+            teacher=teacher
+        )
+        messages.success(request, "Class created successfully!")
+        return redirect('dashboard')
+
+    return redirect('dashboard')
+
+def MyClasses(request):
+    school_id = request.session.get('school_id')
+    if not school_id:
+        messages.warning(request, "Please log in first.")
+        return redirect('index')
+
+    teacher = User.objects.filter(school_id=school_id).first()
+    classes = Class.objects.filter(teacher=teacher).order_by('-class_id')  # use class_id
+
+    return render(request, 'User/MyClasses.html', {
+        'currentpage': 'MyClasses',
+        'user': teacher,
+        'classes': classes,
+    })
+
+
+
+def delete_class(request, class_id):
+    school_id = request.session.get('school_id')
+    if not school_id:
+        messages.warning(request, "Please log in first.")
+        return redirect('index')
+
+    class_obj = get_object_or_404(Class, class_id=class_id, teacher__school_id=school_id)
+    class_obj.delete()
+    messages.success(request, "Class deleted successfully!")
+    return redirect('MyClasses')
 
 
