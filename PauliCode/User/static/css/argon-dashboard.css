@@ -28255,3 +28255,13 @@ pre[class*=language-] {
 }
 
 /*# sourceMappingURL=dashboard-free.css.map */
+
+.button-gray{
+  
+  background-color: #434343;
+  color: white;
+};
+
+.button-gray:hover {
+  background-color: #555555; /* slightly lighter on hover */
+}
