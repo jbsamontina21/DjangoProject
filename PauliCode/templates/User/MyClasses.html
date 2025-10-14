@@ -3,55 +3,73 @@
 
 <body class="g-sidenav-show text-white" style="background-color: #273149">
   <div class="min-height-300 position-absolute w-100"></div>
-
-  {% include "partials/sidebar.html" %} <!-- Sidebar -->
+  {% include "partials/sidebar.html" %}
 
   <main class="main-content position-relative border-radius-lg p-4">
+    
+   <!-- HEADER ROW -->
+    <div class="d-flex justify-content-between align-items-start flex-wrap p-3">
 
-    <!-- Header Row: Title + Search -->
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-      <h4 class="fw-bold text-white mb-2 mb-md-0">My Classes</h4>
-      
-      <form class="d-flex" method="GET">
-        <input 
-          class="form-control form-control-sm" 
-          style="width: 40vh; height: 5vh; border: 1px solid #ced4da; border-radius: 0.25rem;" 
-          type="search" 
-          name="q" 
-          placeholder="Search classes..." 
-          aria-label="Search"
-          value="{{ request.GET.q|default:'' }}">
-          
-        <button class="btn btn-outline-success btn-sm ms-2" type="submit">Search</button>
-      </form>
-    </div>
+      <!-- Left: Title -->
+      <h4 class="fw-bold text-white mb-md-0">My Classes</h4>
+      <!-- Right: Search and Create Button -->
+      <div class="d-flex flex-column align-items-end">
+        <!-- Search Bar -->
+        <form class="d-flex mb-2" method="GET">
+          <input 
+            class="form-control form-control-sm bg-dark text-white border-0 shadow-sm"
+            style="width: 40vh; height: 5vh; border-radius: 0.25rem;"
+            type="search" 
+            name="q" 
+            placeholder="Search classes..." 
+            aria-label="Search"
+            value="{{ request.GET.q|default:'' }}">
+          <button class="btn btn-outline-success btn-sm ms-2 px-3 align-items-center" type="submit">
+            <i class="fa fa-search me-1"></i> Search
+          </button>
+        </form>
+        
+    <!-- Create Class Button -->
+        
+       </div>
+       <button class="btn btn-success text-white fw-bold shadow-sm" 
+                data-bs-toggle="modal" data-bs-target="#createClassModal">
+          <i class="fa fa-plus me-2"></i> Create Class
+         </button>
+      </div>
 
-    <!-- Classes Grid -->
-    <div class="row g-3">
+
+
+
+    <!-- CLASSES GRID -->
+    <div class="row g-3 p-3 mb-4">
       {% if classes %}
         {% for cls in classes %}
           {% if not request.GET.q or request.GET.q|lower in cls.title|lower or request.GET.q|lower in cls.class_code|lower %}
             <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-              <div class="card text-center border-0 rounded-4 shadow-sm text-white {% cycle 'color-green' 'bg-dark' %} position-relative cls-card">
+        <a href="{% url 'classDetails' cls.class_id %}" class="text-decoration-none text-white">
+          <div class="card text-center border-0 rounded-4 shadow-sm {% cycle 'color-green' 'bg-dark' %} position-relative cls-card">
 
-                <!-- Delete Button (hover) -->
-                <a href="{% url 'delete_class' cls.class_id %}" 
-                   class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 delete-btn"
-                   onclick="return confirm('Are you sure you want to delete this class?');">
-                  Delete
-                </a>
+            <!-- Delete Button (form instead of <a>) -->
+            <form action="{% url 'delete_class' cls.class_id %}" method="post"
+                  class="position-absolute top-0 end-0 m-2"
+                  onsubmit="return confirm('Are you sure you want to delete this class?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-danger delete-btn">Delete</button>
+            </form>
 
-                <div class="card-body d-flex flex-column justify-content-center align-items-center p-2">
-                  <!-- Bigger thumbnail relative to smaller card -->
-                  <img src="{{ cls.upload_icon.url|default:'/media/class_icons/defaultClassIcon.png' }}" 
-                       alt="Class Icon" 
-                       class="rounded mb-2 cls-img">
-
-                  <h6 class="fw-bold mt-1 text-white">{{ cls.title }}</h6>
-                  <p class="small text-light mb-0">{{ cls.class_code }}</p>
-                </div>
-              </div>
+            <div class="card-body d-flex flex-column justify-content-center align-items-center p-2">
+              <img src="{{ cls.upload_icon.url|default:'/media/class_icons/defaultClassIcon.png' }}" 
+                  alt="Class Icon" 
+                  class="rounded mb-2 cls-img">
+              <h6 class="fw-bold mt-1 text-white">{{ cls.title }}</h6>
+              <p class="small text-light mb-0">{{ cls.class_code }}</p>
             </div>
+          </div>
+        </a>
+      </div>
+
+
           {% endif %}
         {% endfor %}
       {% else %}
@@ -59,53 +77,139 @@
       {% endif %}
     </div>
 
+
+
   </main>
 
   {% include "partials/footer.html" %}
   {% include "partials/scripts.html" %}
 
+  <!-- CREATE CLASS MODAL -->
+  <div class="modal fade" id="createClassModal" tabindex="-1" aria-labelledby="createClassLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+      <div class="modal-content shadow-lg border-0" style="background-color: #1E2835; color: white; border-radius: 16px;">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold text-success" id="createClassLabel">
+            Create New Class
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body pt-0">
+          <p class="text-muted small mb-4">Set up your classroom with all the essential details to get started.</p>
+
+          <form id="createClassForm" method="POST" enctype="multipart/form-data" action="{% url 'create_class' %}">
+            {% csrf_token %}
+
+            <!-- Upload -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Class Thumbnail</label>
+              <div class="upload-box border border-2 border-dashed rounded position-relative d-flex justify-content-center align-items-center"
+                   style="width: 100px; height: 100px; background-color: #101826; cursor: pointer;">
+                <input type="file" id="uploadIcon" name="upload_icon" accept="image/*" class="position-absolute w-100 h-100 opacity-0" style="cursor: pointer;">
+                <div class="text-center" id="uploadPlaceholder">
+                  <i class="fa fa-camera mb-2 text-muted" style="font-size: 28px;"></i>
+                  <p class="small text-muted mb-0">Upload</p>
+                </div>
+                <img id="previewImage" src="#" alt="Preview" class="d-none position-absolute top-0 start-0 w-100 h-100 rounded" style="object-fit: cover;">
+              </div>
+              <p class="text-muted small mt-2 mb-0">Recommended: 400×400px (JPG, PNG)</p>
+            </div>
+
+            <!-- Class Code -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Class Code</label>
+              <input type="text" name="class_code" class="form-control text-white"
+                     placeholder="Enter unique class code (e.g., APPDEV3)"
+                     style="background-color: #101826; border: 1px solid #4CD964; border-radius: 8px;">
+            </div>
+
+            <!-- Class Title -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Class Title</label>
+              <input type="text" name="title" class="form-control text-white"
+                     placeholder="Enter class title (e.g., Application Development)"
+                     style="background-color: #101826; border: 1px solid #555; border-radius: 8px;">
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">Class Description</label>
+              <textarea name="description" rows="3" class="form-control text-white"
+                        placeholder="Enter class description..."
+                        style="background-color: #101826; border: 1px solid #555; border-radius: 8px;"></textarea>
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-end">
+              <button type="button" class="btn btn-outline-secondary btn-sm me-2 px-3" data-bs-dismiss="modal">
+                <i class="fa fa-times me-1"></i> Cancel
+              </button>
+              <button type="submit" class="btn btn-success btn-sm px-3">
+                <i class="fa fa-plus me-1"></i> Create Class
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thumbnail Preview Script -->
+  <script>
+  document.getElementById("uploadIcon").addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById("previewImage");
+    const placeholder = document.getElementById("uploadPlaceholder");
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        preview.src = e.target.result;
+        preview.classList.remove("d-none");
+        placeholder.style.display = "none";
+      };
+      reader.readAsDataURL(file);
+    } else {
+      preview.src = "#";
+      preview.classList.add("d-none");
+      placeholder.style.display = "block";
+    }
+  });
+  </script>
+
   <style>
-    /* Card hover effect */
     .cls-card {
-      width: 200px;   /* smaller square width */
-      height: 200px;  /* smaller square height */
+      width: 200px;
+      height: 200px;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .cls-card:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 16px rgba(0,0,0,0.4);
     }
-
-    /* Delete button initially hidden */
     .delete-btn {
       display: none;
     }
     .cls-card:hover .delete-btn {
       display: block;
     }
-
-    /* Smaller card body */
-    .cls-card .card-body {
-      padding: 0.5rem !important;
-    }
-
-    /* Thumbnail size bigger relative to card */
-    .cls-card .cls-img {
+    .cls-img {
       width: 80px;
       height: 80px;
       object-fit: cover;
     }
-
-    /* Search box focus outline success */
     input[name="q"]:focus {
-      border-color: #198754; /* Bootstrap 'success' color */
+      border-color: #198754;
       box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
-      outline: none;
     }
-
     .color-green{
-        background-color: rgb(35, 103, 51);
+        background-color: rgb(35, 103, 51) !important;
     }
+    
+
+   
+
   </style>
 </body>
 </html>

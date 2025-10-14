@@ -1,0 +1,103 @@
+{% load static %}
+
+<style>
+  /* Make sidebar smaller */
+  #sidenav-main {
+    width: 180px !important; /* smaller width */
+    background-color: #434343 !important;
+  }
+
+  /* Adjust the sidebar inner elements */
+  #sidenav-main .navbar-brand span {
+    font-size: 14px;
+  }
+
+  #sidenav-main .nav-link-text {
+    font-size: 13px;
+  }
+
+  #sidenav-main .icon {
+    min-width: 30px;
+    height: 30px;
+  }
+
+  #sidenav-main,
+  #sidenav-main * {
+    color: white !important;
+  }
+
+  #sidenav-main a.nav-link {
+    padding: 6px 12px;
+  }
+
+  #sidenav-main a.nav-link:hover {
+    color: #ddd !important;
+  }
+
+  /* Make the main content adjust to smaller sidebar */
+  .main-content {
+    margin-left: 200px !important; /* adjust based on sidebar width */
+  }
+</style>
+
+
+<aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4" id="sidenav-main">
+  <div class="sidenav-header text-center align-items-center">
+   
+   <a class="navbar-brand m-0" href="{% url 'StudentDashboard' %}">
+  <img src="{% static 'img/PCodeLogo.svg' %}" width="26px" height="26px" class="navbar-brand-img h-100" alt="main_logo">
+  <span class="ms-1 font-weight-bold">PauliCode</span>
+  </a>
+
+
+  </div>
+  <hr class="horizontal dark mt-0">
+
+
+
+
+  <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+
+    <ul class="navbar-nav">
+
+      <!--Profile Pic and Username-->
+      <li class="nav-item mb-4">
+          <a href="#" class="d-flex flex-column align-items-center text-decoration-none text-white">
+            <div class="profile-pic border-radius-md overflow-hidden mb-2">
+              <img src="{{ user.user_image.url|default:'/media/profile_pic/image.png' }}" 
+                  alt="Profile Picture" 
+                  class="img-fluid rounded-circle profile-img">
+            </div>
+            <span class="fw-bold username">
+              {{ user.first_name }} {{ user.last_name }}
+            </span>
+            <span class="nav-link-text text-muted small">
+              School ID: {{ user.school_id }}
+            </span>
+          </a>
+      </li>
+
+      <li class="nav-item mb-2">
+        <a class="nav-link {% if currentpage == 'StudentDashboard' %}active{% endif %}" href="{% url 'StudentDashboard' %}">
+          <div class="border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <img src="{% static 'img/dashboardIcon.png' %}" alt="icon" style = "height: 20px; width: 20px;">
+          </div>
+          <span class="nav-link-text ms-1">Dashboard</span>
+        </a>
+      </li>
+
+       <li class="nav-item">
+        <a class="nav-link {% if currentpage == 'StudentClass' %}active{% endif %}" href="{% url 'StudentClass' %}">
+          <div class="border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+            <img src="{% static 'img/blackboardIcon.png' %}" alt="icon" style = "height: 20px; width: 20px;">
+          </div>
+          <span class="nav-link-text ms-1">Classes</span>
+        </a>
+      </li>
+  
+    </ul>
+  </div>
+  <div class="sidenav-footer px-3" style="padding-top: 25vh;">
+    <a class="btn btn-danger btn-sm mb-0 w-100" href="{% url 'logout' %}" type="button">Logout</a>
+  </div>
+</aside>
