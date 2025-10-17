@@ -6,6 +6,8 @@ from django.http import JsonResponse
 import json, requests   
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from .models import User, Submission
+from django.db.models import Count, Q
 
 # ---------------- LOGIN & DASHBOARD ---------------- #
 
@@ -713,3 +715,81 @@ def submit_problem(request):
         "passed": passed,
         "total": total
     })
+# ---------- REPORT DASHBOARD ----------
+def report(request):
+    
+    # Count all students (based on user_type, not role)
+    total_students = User.objects.filter(user_type="student").count()
+
+    # Count all submissions
+    total_submissions = Submission.objects.count()
+
+    # For pending reviews, let’s just assume those without score yet
+    pending_reviews = Submission.objects.filter(score__isnull=True).count()
+
+    # Fetch all submissions ordered by submission_id (not id)
+    submissions = Submission.objects.all().order_by('-submission_id')
+
+    context = {
+        'total_students': total_students,
+        'total_submissions': total_submissions,
+        'pending_reviews': pending_reviews,
+        'submissions': submissions,
+    }
+
+    return render(request, 'report.html', context)
+
+# ---------- EDIT STUDENT ----------
+def report(request):
+    if not request.session.get('school_id'):
+        return redirect('index')
+
+    # Use correct primary key field for ordering
+    submissions = Submission.objects.all().order_by('-submission_id')
+
+    context = {
+        'submissions': submissions,
+    }
+    return render(request, 'User/report.html', context)
+
+
+# ---------- DELETE STUDENT ----------
+def delete_student(request, user_id):
+    student = get_object_or_404(User, id=user_id, role='student')
+    student.delete()
+    messages.success(request, 'Student deleted successfully!')
+    return redirect('report')
+# ---------------- REVIEW SUBMISSION ---------------- #
+
+def review_submission(request, submission_id):
+    submission = get_object_or_404(Submission, id=submission_id)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        feedback = request.POST.get('feedback')
+        submission.status = new_status
+        submission.feedback = feedback
+        submission.save()
+        messages.success(request, '✅ Submission review updated successfully!')
+        return redirect('report')
+
+    return render(request, 'review_submission.html', {'submission': submission})
+
+def edit_student(request, user_id):
+    student = get_object_or_404(User, id=user_id, user_type='student')
+
+    if request.method == 'POST':
+        student.first_name = request.POST.get('first_name')
+        student.last_name = request.POST.get('last_name')
+        student.school_id = request.POST.get('school_id')
+        student.save()
+        messages.success(request, 'Student record updated successfully!')
+        return redirect('report')  # or wherever your dashboard/report page is
+
+    return render(request, 'edit_student.html', {'student': student})
+def delete_student(request, user_id):
+    student = get_object_or_404(User, id=user_id, user_type='student')
+    student.delete()
+    messages.success(request, 'Student deleted successfully!')
+    return redirect('report')
+

@@ -1,0 +1,76 @@
+{% load static %}
+{% include "partials/header.html" %}
+
+<style>
+  body {
+    background-color: #111827 !important;
+  }
+  .card {
+    background-color: #1f2937;
+  }
+  h3, h5, h6, p {
+    color: white;
+  }
+</style>
+
+<body class="g-sidenav-show text-white">
+  {% include "partials/sidebar.html" %}
+
+  <main class="main-content position-relative border-radius-lg">
+    <div class="container-fluid p-5">
+
+      <!-- Header Card -->
+      <div class="card bg-success text-white border-0 mb-4 rounded-4 shadow-sm">
+        <div class="card-body py-4">
+          <h3 class="fw-bold text-white mb-1">Reports Dashboard</h3>
+          <h6 class="text-white small">Monitor student activity and performance summaries here.</h6>
+        </div>
+      </div>
+
+      <!-- Stats Summary Cards -->
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card border-0 rounded-4 shadow-sm text-center p-4">
+            <h6 class="fw-bold text-success">Total Students</h6>
+            <h3 class="fw-bold text-white">
+              {{ total_students|default:"0" }}
+            </h3>
+            <p class="text-muted small mb-0">Active in your classes</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card border-0 rounded-4 shadow-sm text-center p-4">
+            <h6 class="fw-bold text-success">Tasks Completed</h6>
+            <h3 class="fw-bold text-white">
+              {{ total_tasks|default:"0" }}
+            </h3>
+            <p class="text-muted small mb-0">Across all classes</p>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card border-0 rounded-4 shadow-sm text-center p-4">
+            <h6 class="fw-bold text-success">Pending Reviews</h6>
+            <h3 class="fw-bold text-white">
+              {{ pending_reviews|default:"0" }}
+            </h3>
+            <p class="text-muted small mb-0">Submissions to check</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Graphs / Charts Placeholder -->
+      <div class="card mt-4 rounded-4 shadow-sm border-0 p-4">
+        <h5 class="fw-bold text-white mb-3">Performance Overview</h5>
+        <p class="text-muted small mb-0">
+          You can later add charts, tables, or analytics summaries here.
+        </p>
+      </div>
+
+      {% include "partials/footer.html" %}
+    </div>
+  </main>
+</body>
+{% include "partials/scripts.html" %}
+</html>

@@ -1,0 +1,26 @@
+{% load static %}
+{% include "partials/header.html" %}
+<body class="bg-dark text-white">
+  <div class="container mt-5">
+    <div class="card bg-secondary p-4 rounded-4 shadow-sm">
+      <h4 class="fw-bold mb-3">Review Submission: {{ submission.id }}</h4>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label text-light">Status</label>
+          <select class="form-select" name="status">
+            <option value="pending" {% if submission.status == "pending" %}selected{% endif %}>Pending</option>
+            <option value="completed" {% if submission.status == "completed" %}selected{% endif %}>Completed</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label text-light">Feedback</label>
+          <textarea name="feedback" class="form-control">{{ submission.feedback }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Save Review</button>
+        <a href="{% url 'report' %}" class="btn btn-outline-light">Back</a>
+      </form>
+    </div>
+  </div>
+</body>
+{% include "partials/footer.html" %}
