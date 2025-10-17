@@ -5,16 +5,24 @@
   body {
     background-color: #111827 !important;
   }
-  .card {
+  .card, .table {
     background-color: #1f2937;
+    color: white;
   }
-  h3, h5, h6, p {
+  th, td, h3, h5, h6, p {
+    color: white;
+  }
+  .btn-custom {
+    margin-right: 10px;
+  }
+  .btn-delete {
+    background-color: #dc3545;
     color: white;
   }
 </style>
 
 <body class="g-sidenav-show text-white">
-  {% include "partials/sidebar.html" %}
+  {% include "partials/studentSidebar.html" %}
 
   <main class="main-content position-relative border-radius-lg">
     <div class="container-fluid p-5">
@@ -23,54 +31,159 @@
       <div class="card bg-success text-white border-0 mb-4 rounded-4 shadow-sm">
         <div class="card-body py-4">
           <h3 class="fw-bold text-white mb-1">Reports Dashboard</h3>
-          <h6 class="text-white small">Monitor student activity and performance summaries here.</h6>
+          <h6 class="text-white small">Monitor class, problem, and student performance here.</h6>
         </div>
       </div>
 
-      <!-- Stats Summary Cards -->
-      <div class="row g-3">
-        <div class="col-md-4">
-          <div class="card border-0 rounded-4 shadow-sm text-center p-4">
-            <h6 class="fw-bold text-success">Total Students</h6>
-            <h3 class="fw-bold text-white">
-              {{ total_students|default:"0" }}
-            </h3>
-            <p class="text-muted small mb-0">Active in your classes</p>
+      <!-- Class List Table -->
+      <div class="card rounded-4 shadow-sm border-0 p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-white">Class List</h5>
+          <div>
+            <button class="btn btn-primary btn-sm btn-custom" onclick="printTable('classListTable')">Print</button>
+            <button class="btn btn-success btn-sm btn-custom" onclick="downloadCSV('classListTable', 'class_list.csv')">Save CSV</button>
           </div>
         </div>
-
-        <div class="col-md-4">
-          <div class="card border-0 rounded-4 shadow-sm text-center p-4">
-            <h6 class="fw-bold text-success">Tasks Completed</h6>
-            <h3 class="fw-bold text-white">
-              {{ total_tasks|default:"0" }}
-            </h3>
-            <p class="text-muted small mb-0">Across all classes</p>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="card border-0 rounded-4 shadow-sm text-center p-4">
-            <h6 class="fw-bold text-success">Pending Reviews</h6>
-            <h3 class="fw-bold text-white">
-              {{ pending_reviews|default:"0" }}
-            </h3>
-            <p class="text-muted small mb-0">Submissions to check</p>
-          </div>
-        </div>
+        <table id="classListTable" class="table table-hover text-white">
+          <thead>
+            <tr>
+              <th>Class ID</th>
+              <th>Class Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for class in classes %}
+            <tr>
+              <td>{{ class.id }}</td>
+              <td>{{ class.name }}</td>
+              <td>
+                <a href="{% url 'delete_class' class.id %}" class="btn btn-sm btn-delete">Delete</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="3" class="text-center text-muted">No classes found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
 
-      <!-- Graphs / Charts Placeholder -->
-      <div class="card mt-4 rounded-4 shadow-sm border-0 p-4">
-        <h5 class="fw-bold text-white mb-3">Performance Overview</h5>
-        <p class="text-muted small mb-0">
-          You can later add charts, tables, or analytics summaries here.
-        </p>
+      <!-- Problem List Table -->
+      <div class="card rounded-4 shadow-sm border-0 p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-white">Problem List</h5>
+          <div>
+            <button class="btn btn-primary btn-sm btn-custom" onclick="printTable('problemListTable')">Print</button>
+            <button class="btn btn-success btn-sm btn-custom" onclick="downloadCSV('problemListTable', 'problem_list.csv')">Save CSV</button>
+          </div>
+        </div>
+        <table id="problemListTable" class="table table-hover text-white">
+          <thead>
+            <tr>
+              <th>Problem ID</th>
+              <th>Label</th>
+              <th>Time of Activity</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for problem in problems %}
+            <tr>
+              <td>{{ problem.id }}</td>
+              <td>{{ problem.label }}</td>
+              <td>{{ problem.time }}</td>
+              <td>{{ problem.date }}</td>
+              <td>
+                <a href="{% url 'delete_problem' problem.id %}" class="btn btn-sm btn-delete">Delete</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center text-muted">No problems found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Student Results Table -->
+      <div class="card rounded-4 shadow-sm border-0 p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-white">Student Results</h5>
+          <div>
+            <button class="btn btn-primary btn-sm btn-custom" onclick="printTable('studentResultsTable')">Print</button>
+            <button class="btn btn-success btn-sm btn-custom" onclick="downloadCSV('studentResultsTable', 'student_results.csv')">Save CSV</button>
+          </div>
+        </div>
+        <table id="studentResultsTable" class="table table-hover text-white">
+          <thead>
+            <tr>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Date Submitted</th>
+              <th>Score</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in students %}
+            <tr>
+              <td>{{ student.first_name }}</td>
+              <td>{{ student.last_name }}</td>
+              <td>{{ student.date_submitted }}</td>
+              <td>{{ student.score }}</td>
+              <td>
+                <a href="{% url 'delete_student' student.id %}" class="btn btn-sm btn-delete">Delete</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center text-muted">No student records found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
 
       {% include "partials/footer.html" %}
     </div>
   </main>
+
+  <script>
+    // Download table as CSV
+    function downloadCSV(tableId, filename) {
+      let csv = [];
+      const rows = document.querySelectorAll(`#${tableId} tr`);
+      rows.forEach(row => {
+        const cols = row.querySelectorAll("th, td:not(:last-child)"); // Skip Action column
+        let rowData = [];
+        cols.forEach(col => rowData.push(col.innerText.replace(/\n/g, "")));
+        csv.push(rowData.join(","));
+      });
+      const csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+      const downloadLink = document.createElement("a");
+      downloadLink.download = filename;
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+    }
+
+    // Print specific table
+    function printTable(tableId) {
+      let printContents = document.getElementById(tableId).outerHTML;
+      let originalContents = document.body.innerHTML;
+      document.body.innerHTML = printContents;
+      window.print();
+      document.body.innerHTML = originalContents;
+      location.reload(); // Reload page to restore JS events
+    }
+  </script>
+
 </body>
+
 {% include "partials/scripts.html" %}
 </html>
