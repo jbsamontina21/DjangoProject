@@ -1,16 +1,13 @@
 from django.db import models
-from datetime import datetime
 from django.utils import timezone
-import os, random
 from django.utils.html import mark_safe
-
-now = timezone.now()
+import os, random
 
 # ---------- Helper Function for Image Uploads ----------
 def image_path(instance, filename):
     basefilename, file_extension = os.path.splitext(filename)
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    randomstr = ''.join((random.choice(chars)) for x in range(10))
+    randomstr = ''.join(random.choice(chars) for x in range(10))
     return f'profile_pic/{basefilename}_{randomstr}{file_extension}'
 
 
@@ -44,7 +41,13 @@ class Class(models.Model):
     title = models.CharField(max_length=150)
     description = models.TextField(blank=True, null=True)
     teacher = models.ForeignKey(User, on_delete=models.CASCADE, related_name='classes')
-    upload_icon = models.ImageField(upload_to='class_icons/', blank=True, null=True)
+    # Set a default icon to prevent errors
+    upload_icon = models.ImageField(
+        upload_to='class_icons/',
+        blank=True,
+        null=True,
+        default='class_icons/defaultClassIcon.png'
+    )
 
     def __str__(self):
         return f"{self.title} ({self.class_code})"
